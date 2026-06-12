@@ -535,6 +535,10 @@ window.addEventListener("click", function(){ var d=document.documentElement; (d.
 
 <hr style="width:100%; max-width:1200px; border:none; border-top:1px dashed var(--app-border); margin:30px auto 10px auto; opacity:0.5;">
 <div id="calendarContainer" style="width:100%; max-width:1200px; margin:0 auto 25px auto; padding:15px; background:transparent; border:1px solid var(--app-border); border-radius:8px; color:var(--app-text); box-sizing:border-box;">
+    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px;">
+        <button id="calModeReadBtn" class="icon-btn" style="background:var(--app-accent); color:#000; font-weight:bold;" onclick="switchCalMode('read')">📖 基础阅读</button>
+        <button id="calModeTypeBtn" class="icon-btn" style="background:transparent; color:var(--app-text); font-weight:bold;" onclick="switchCalMode('type')">⌨️ 盲打练习</button>
+    </div>
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
         <button class="icon-btn" onclick="changeMonth(-1)">◀ 上月</button>
         <div style="font-weight:bold; font-size:16px; cursor:pointer;" onclick="changeMonth(0)">📅 <span id="calYear"></span>年 <span id="calMonth"></span>月</div>
@@ -705,6 +709,34 @@ function updateTodayProgressUI() {
 }
 
 let currentCalDate = new Date();
+let currentCalMode = 'read';
+function switchCalMode(mode) {
+    currentCalMode = mode;
+    document.getElementById('calModeReadBtn').style.background = mode === 'read' ? 'var(--app-accent)' : 'transparent';
+    document.getElementById('calModeReadBtn').style.color = mode === 'read' ? '#000' : 'var(--app-text)';
+    document.getElementById('calModeTypeBtn').style.background = mode === 'type' ? 'var(--app-accent)' : 'transparent';
+    document.getElementById('calModeTypeBtn').style.color = mode === 'type' ? '#000' : 'var(--app-text)';
+    renderCalendar();
+}
+
+let typedCards = new Set(JSON.parse(localStorage.getItem('catchase_typed_cards') || '[]'));
+function markCardAsTyped(cardKey) {
+    if (!typedCards.has(cardKey)) {
+        typedCards.add(cardKey);
+        localStorage.setItem('catchase_typed_cards', JSON.stringify([...typedCards]));
+    }
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    let dailyData = JSON.parse(localStorage.getItem('catchase_daily_typing') || '{}');
+    if (!dailyData[dateStr]) dailyData[dateStr] = [];
+    // 修改逻辑：只要调用了打字记录，即认为已经练过，无需判断是否打完，同时记录去重
+    if (!dailyData[dateStr].includes(cardKey)) {
+        dailyData[dateStr].push(cardKey);
+        localStorage.setItem('catchase_daily_typing', JSON.stringify(dailyData));
+        if(typeof renderCalendar === 'function') renderCalendar();
+    }
+}
+
 function renderCalendar() {
     const year = currentCalDate.getFullYear();
     const month = currentCalDate.getMonth();
@@ -718,7 +750,8 @@ function renderCalendar() {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
-    const dailyData = JSON.parse(localStorage.getItem('catchase_daily_read') || '{}');
+    const dailyDataKey = currentCalMode === 'type' ? 'catchase_daily_typing' : 'catchase_daily_read';
+    const dailyData = JSON.parse(localStorage.getItem(dailyDataKey) || '{}');
     const calGrid = document.getElementById('calGrid');
     calGrid.innerHTML = '';
     
@@ -754,7 +787,7 @@ function renderCalendar() {
         
         cell.onclick = () => {
             if (count > 0) {
-                renderReviewCards(dateStr, dailyData[dateStr]);
+                renderReviewCards(dateStr, dailyData[dateStr], currentCalMode);
             }
         };
         
@@ -768,7 +801,7 @@ function changeMonth(delta) {
     renderCalendar();
 }
 
-async function renderReviewCards(dateStr, cardKeys) {
+async function renderReviewCards(dateStr, cardKeys, mode = 'read') {
     document.querySelectorAll('.category-tab').forEach(tab => tab.classList.remove('active'));
     currentCategory = `Review-${dateStr}`;
     const resultsGrid = document.getElementById('resultsGrid');
@@ -794,7 +827,8 @@ async function renderReviewCards(dateStr, cardKeys) {
     title.style.fontSize = '16px';
     title.style.fontWeight = 'bold';
     title.style.color = 'var(--app-accent)';
-    title.innerHTML = `📚 复习模式：${dateStr} (共 ${filteredData.length} 张)<br><span style="font-size:12px; opacity:0.7; font-weight:normal;">点击上方任意分类退出复习模式</span>`;
+    const titleModeStr = mode === 'type' ? '⌨️ 盲打复习' : '📚 复习模式';
+    title.innerHTML = `${titleModeStr}：${dateStr} (共 ${filteredData.length} 张)<br><span style="font-size:12px; opacity:0.7; font-weight:normal;">点击上方任意分类退出复习模式</span>`;
     resultsGrid.appendChild(title);
 
     filteredData.forEach((data, i) => {
@@ -806,6 +840,10 @@ async function renderReviewCards(dateStr, cardKeys) {
         const cardKey = `${data.c}_${data.theme}`;
         wrapper.setAttribute('data-card-key', cardKey);
         wrapper.onclick = async () => {
+            if (mode === 'type') {
+                startTypingMode(data);
+                return;
+            }
             if (!generatedDOMs[i]) {
                 const cardDOM = createBaseCardDOM(data);
                 stagingArea.appendChild(cardDOM);
@@ -2110,7 +2148,9 @@ function closeP2PSync() {
 function getSyncData() {
     return {
         readCards: JSON.parse(localStorage.getItem('catchase_read_cards') || '[]'),
-        dailyRead: JSON.parse(localStorage.getItem('catchase_daily_read') || '{}')
+        dailyRead: JSON.parse(localStorage.getItem('catchase_daily_read') || '{}'),
+        typedCards: JSON.parse(localStorage.getItem('catchase_typed_cards') || '[]'),
+        dailyTyping: JSON.parse(localStorage.getItem('catchase_daily_typing') || '{}')
     };
 }
 
@@ -2131,6 +2171,22 @@ function mergeSyncData(remoteData) {
     }
     localStorage.setItem('catchase_daily_read', JSON.stringify(localDaily));
     
+    let localTyped = new Set(JSON.parse(localStorage.getItem('catchase_typed_cards') || '[]'));
+    if (remoteData.typedCards) remoteData.typedCards.forEach(c => localTyped.add(c));
+    localStorage.setItem('catchase_typed_cards', JSON.stringify([...localTyped]));
+    typedCards = localTyped;
+    
+    let localDailyTyping = JSON.parse(localStorage.getItem('catchase_daily_typing') || '{}');
+    if (remoteData.dailyTyping) {
+        for(let date in remoteData.dailyTyping) {
+            if(!localDailyTyping[date]) localDailyTyping[date] = [];
+            let ds = new Set(localDailyTyping[date]);
+            remoteData.dailyTyping[date].forEach(c => ds.add(c));
+            localDailyTyping[date] = [...ds];
+        }
+    }
+    localStorage.setItem('catchase_daily_typing', JSON.stringify(localDailyTyping));
+
     if(typeof renderCalendar === 'function') renderCalendar();
     if(typeof updateTodayProgressUI === 'function') updateTodayProgressUI();
     
@@ -2187,10 +2243,10 @@ function checkAndReadNextWord(index) {
     }
 }
 
-function startTypingMode() {
+function startTypingMode(specificData = null) {
     if (!allImportedData || allImportedData.length === 0) return alert("数据正在加载，请稍候...");
     
-    typingCurrentData = allImportedData[Math.floor(Math.random() * allImportedData.length)];
+    typingCurrentData = specificData || allImportedData[Math.floor(Math.random() * allImportedData.length)];
     
     // 提取纯文本（保留原始标点以供打字练习）
     const rawEn = typingCurrentData.paragraph_en.replace(/<[^>]*>?/gm, '').replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim();
@@ -2386,6 +2442,9 @@ function endTyping() {
     isTypingPlaying = false;
     document.getElementById('typingHiddenInput').blur();
     updateTypingStats();
+    if (typingCurrentData) {
+        markCardAsTyped(`${typingCurrentData.c}_${typingCurrentData.theme}`);
+    }
 }
 
 function closeTypingMode() {
@@ -2584,6 +2643,10 @@ function handleTypingInput() {
     const hiddenInput = document.getElementById('typingHiddenInput');
     if (!isTypingPlaying) {
         startTypingTimer();
+        // 只要开始输入字符，立刻记录已练过该卡片
+        if (typingCurrentData) {
+            markCardAsTyped(`${typingCurrentData.c}_${typingCurrentData.theme}`);
+        }
     }
 
     let currentInput = hiddenInput.value
