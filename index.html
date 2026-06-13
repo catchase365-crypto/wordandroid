@@ -228,6 +228,50 @@
         body.hermes-mode .menu-item { color: rgba(253, 250, 247, 0.7); border: 1px solid rgba(243, 112, 33, 0.15); }
         body.hermes-mode .menu-item.active { background: #f37021; color: #0e0c0b; border-color: #f37021; }
 
+        /* ==================== 新增：琉璃液态磨砂主题 (theme-glass) ==================== */
+        .bg-blobs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; filter: blur(100px); display: none; overflow: hidden; pointer-events: none; }
+        body.glass-mode .bg-blobs { display: block; }
+        .blob { position: absolute; width: 35vw; height: 35vw; border-radius: 50%; opacity: 0.4; mix-blend-mode: screen; animation: blob-move 20s infinite alternate ease-in-out; filter: blur(40px); }
+        .blob-1 { background: #ff2d55; top: -10%; left: -10%; }
+        .blob-2 { background: #34c759; bottom: -10%; right: -10%; animation-delay: -5s; }
+        .blob-3 { background: #af52de; top: 20%; left: 30%; animation-delay: -10s; }
+        .blob-4 { background: #007aff; top: 40%; left: 60%; animation-delay: -15s; }
+        .blob-5 { background: #ff9500; bottom: 20%; left: 10%; animation-delay: -8s; }
+        @keyframes blob-move {
+            0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+            50% { transform: translate(15vw, 10vh) scale(1.2) rotate(180deg); }
+            100% { transform: translate(-5vw, 20vh) scale(0.9) rotate(360deg); }
+        }
+
+        .theme-glass { --card-bg: rgba(255, 255, 255, 0.03); --text-color: #ffffff; --border-color: rgba(255, 255, 255, 0.1); --accent: #ffffff; --bg-img: none; --app-bg: #000000; --app-text: #ffffff; --app-border: rgba(255, 255, 255, 0.2); --app-accent: #ffffff; }
+        .theme-glass.card-container { background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(60px) !important; -webkit-backdrop-filter: blur(60px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6) !important; }
+        .theme-glass .top-section, .theme-glass .bottom-section, .theme-glass .center-word, .theme-glass .header-box { background: rgba(255, 255, 255, 0.05) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important; backdrop-filter: blur(10px); }
+        .theme-glass .word-item { color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; background: rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); font-weight: 700 !important; }
+        .theme-glass .zh-translation { color: rgba(255, 255, 255, 0.6) !important; border-top: 1px dashed rgba(255, 255, 255, 0.2) !important; }
+        .theme-glass .def-item { background: rgba(255, 255, 255, 0.05) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; }
+        .theme-glass .def-item div { color: rgba(255, 255, 255, 0.9) !important; }
+        .theme-glass .active-focus, .theme-glass .t-active-focus { background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; box-shadow: 0 0 20px rgba(255, 255, 255, 0.4) !important; opacity: 1 !important; }
+
+        body.glass-mode { background-color: #000000 !important; }
+        body.glass-mode .config-panel, body.glass-mode .lightbox-close, body.glass-mode .lightbox-counter, body.glass-mode .lightbox-fs-btn, body.glass-mode .lightbox-trans-btn, body.glass-mode .lightbox-menu, body.glass-mode .lightbox-progress { background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(60px) !important; -webkit-backdrop-filter: blur(60px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6) !important; color: #ffffff !important; }
+        body.glass-mode button, body.glass-mode .icon-btn { background: rgba(255, 255, 255, 0.05) !important; color: #ffffff !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        body.glass-mode button:hover, body.glass-mode .icon-btn:hover { background: rgba(255, 255, 255, 0.15) !important; transform: scale(1.02); }
+        body.glass-mode input, body.glass-mode textarea, body.glass-mode select { background: rgba(255, 255, 255, 0.05); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; }
+        body.glass-mode .category-tab { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.6); }
+        body.glass-mode .category-tab.active { background: #ffffff !important; color: #000000 !important; border-color: #ffffff !important; font-weight: bold; }
+        body.glass-mode .category-tab.is-read { background: rgba(255, 255, 255, 0.15) !important; border-color: rgba(255, 255, 255, 0.3) !important; color: #ffffff !important; }
+        body.glass-mode .menu-item { color: rgba(255, 255, 255, 0.7); border: 1px solid rgba(255, 255, 255, 0.15); }
+        body.glass-mode .menu-item.active { background: #ffffff; color: #000000; border-color: #ffffff; }
+
+        body.glass-mode #typingModal, body.glass-mode #lightbox { background: transparent !important; } body.glass-mode #typingLandscapeCard { background: rgba(255, 255, 255, 0.03) !important; backdrop-filter: blur(80px) !important; -webkit-backdrop-filter: blur(80px) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6) !important; color: #ffffff !important; }
+        body.glass-mode #typingTreeContainer { background: rgba(255, 255, 255, 0.02) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; box-shadow: inset 0 0 20px rgba(0,0,0,0.2) !important; }
+        body.glass-mode .t-char.t-untyped-placeholder { color: rgba(255,255,255,0.2); }
+        body.glass-mode .t-char { border-bottom: 2px solid rgba(255,255,255,0.2); }
+        body.glass-mode .t-char.t-current { border-bottom-color: #ffffff; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
+        body.glass-mode .t-char.t-correct { color: #ffffff; font-weight: bold; }
+        body.glass-mode .zh-translation { color: rgba(255, 255, 255, 0.7) !important; border-top-color: rgba(255, 255, 255, 0.2) !important; }
+        body.glass-mode .def-item .zh-def { color: rgba(255, 255, 255, 0.8) !important; }
+
                 /* 墨水屏模式 (E-Ink) 专属样式全面强制覆盖 */
         body.ink-mode { --card-w: 750px; --card-h: 1000px; background: #ffffff !important; color: #000000 !important; }
         body.ink-mode .config-panel { background: #ffffff; border: 2px solid #000; box-shadow: none; color: #000; }
@@ -497,6 +541,14 @@ window.addEventListener("click", function(){ var d=document.documentElement; (d.
 </script>
 </head>
 <body>
+
+<div class="bg-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+    <div class="blob blob-5"></div>
+</div>
 
 <div class="config-panel">
     <h3>🧙‍♀️Catchase单词家族点读卡</h3>
@@ -1350,6 +1402,7 @@ function toggleDarkLight() {
     let nextTheme = 'oled';
     if (currentGlobalTheme === 'oled') nextTheme = 'sepia';
     else if (currentGlobalTheme === 'sepia') nextTheme = 'hermes';
+    else if (currentGlobalTheme === 'hermes') nextTheme = 'glass';
     else nextTheme = 'oled';
     changeTheme(nextTheme);
 }
@@ -1368,7 +1421,7 @@ function toggleHideTranslation() {
 }
 
 function applyThemeToBody() {
-    document.body.classList.remove('ink-mode', 'sepia-mode', 'hermes-mode');
+    document.body.classList.remove('ink-mode', 'sepia-mode', 'hermes-mode', 'glass-mode');
     const root = document.documentElement;
     const themeClass = isInkMode ? 'theme-ink' : `theme-${currentGlobalTheme}`;
     
@@ -1404,6 +1457,8 @@ function applyThemeToBody() {
         document.body.classList.add('sepia-mode');
     } else if (currentGlobalTheme === 'hermes') {
         document.body.classList.add('hermes-mode');
+    } else if (currentGlobalTheme === 'glass') {
+        document.body.classList.add('glass-mode');
     }
 
     if (isHideTranslation) {
@@ -1419,6 +1474,7 @@ function applyThemeToBody() {
         if (currentGlobalTheme === 'oled') btn.innerText = '🌃 深色模式 (绿)';
         else if (currentGlobalTheme === 'sepia') btn.innerText = '📜 棕褐模式 (亮)';
         else if (currentGlobalTheme === 'hermes') btn.innerText = '🍊 爱马仕橙 (奢)';
+        else if (currentGlobalTheme === 'glass') btn.innerText = '✨ 琉璃模式 (幻)';
     }
     document.getElementById('inkModeBtn').innerText = isInkMode ? '📖 墨水屏:开' : '📖 墨水屏:关';
 
