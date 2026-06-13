@@ -2395,7 +2395,8 @@ function retryTyping() {
     // 预填充所有字符但设为透明，确保布局稳定不跳动
     container.innerHTML = typingTargetText.split('').map((char, index) => {
         const isSpace = char === ' ';
-        return `<span class="t-char ${index === 0 ? 't-current' : ''} ${!isSpace ? 't-untyped-placeholder' : ''}" data-real="${char}">${isSpace ? '&nbsp;' : char}</span>`;
+        const isHint = !isSpace && (!/[a-zA-Z0-9]/.test(char) || (index === 0 || !/[a-zA-Z0-9]/.test(typingTargetText[index - 1])));
+        return `<span class="t-char ${index === 0 ? 't-current' : ''} ${!isSpace ? 't-untyped-placeholder' : ''}" data-real="${char}" style="${isHint || isSpace ? '' : 'color:transparent'}">${isSpace ? '&nbsp;' : char}</span>`;
     }).join('');
 
     focusTypingInput();
@@ -2733,29 +2734,28 @@ function handleTypingInput() {
     spans.forEach((span, index) => {
         const charTarget = typingTargetText[index];
         const charTyped = currentInput[index];
+        const isSpace = charTarget === ' ';
+        const isHint = !isSpace && (!/[a-zA-Z0-9]/.test(charTarget) || (index === 0 || !/[a-zA-Z0-9]/.test(typingTargetText[index - 1])));
         
         span.classList.remove('t-current', 't-correct', 't-error', 't-untyped-placeholder');
 
         if (index < currentInput.length) {
-            // 已打出的字：显示颜色，若是空格则保持占位
             span.style.color = 'var(--text-color)';
             if (charTyped === charTarget) {
                 span.classList.add('t-correct');
+                span.innerText = isSpace ? '\u00A0' : charTarget;
             } else {
                 span.classList.add('t-error');
-                // 如果打错了，临时显示打错的字符以便纠正，否则显示原字符
                 span.innerText = charTyped === ' ' ? '␣' : charTyped;
             }
         } else if (index === currentInput.length) {
-            // 当前光标位置
             span.classList.add('t-current');
             span.style.color = 'var(--accent)';
-            span.innerText = charTarget === ' ' ? '_' : charTarget;
+            span.innerText = isSpace ? '_' : charTarget;
         } else {
-            // 未打出的字：保持透明占位，不蹦来蹦去
-            span.style.color = 'transparent';
-            span.innerText = charTarget === ' ' ? '\u00A0' : charTarget;
-            if (charTarget !== ' ') span.classList.add('t-untyped-placeholder');
+            span.style.color = isHint ? '' : 'transparent';
+            span.innerText = isSpace ? '\u00A0' : charTarget;
+            if (!isSpace) span.classList.add('t-untyped-placeholder');
         }
     });
 
