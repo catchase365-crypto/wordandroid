@@ -2641,6 +2641,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function handleTypingInput() {
     const hiddenInput = document.getElementById('typingHiddenInput');
+
+    // --- 暴力拦截：移动端键盘/输入法防污染与触发器 ---
+    if (hiddenInput.value.includes('/')) {
+        // 瞬间剥离斜杠，防止进入错字判定
+        hiddenInput.value = hiddenInput.value.replace(/\//g, '');
+        
+        let pos = hiddenInput.value.length;
+        let start = pos === typingTargetText.length ? pos - 1 : pos;
+        if (start >= 0 && !/[a-zA-Z]/.test(typingTargetText[start])) start--;
+        if (start >= 0) {
+            let left = start; while (left > 0 && /[a-zA-Z0-9'\-]/.test(typingTargetText[left - 1])) left--;
+            let right = start; while (right < typingTargetText.length && /[a-zA-Z0-9'\-]/.test(typingTargetText[right])) right++;
+            const word = typingTargetText.substring(left, right);
+            if (word) {
+                let activeSIdx = typingSentenceBounds.findIndex(b => pos >= b.start && pos <= b.end);
+                if (activeSIdx === -1 && pos >= typingTargetText.length) activeSIdx = typingSentenceBounds.length - 1;
+                let sentence = typingTargetText;
+                if (activeSIdx !== -1) {
+                    sentence = typingTargetText.substring(typingSentenceBounds[activeSIdx].start, typingSentenceBounds[activeSIdx].end + 1).trim();
+                }
+                fetch('http://127.0.0.1:3333/api/ai', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ word: word, sentence: sentence })
+                }).catch(err => console.error("AI 呼叫失败:", err));
+            }
+        }
+        return; // 终止本次打字判定
+    }
+
     if (!isTypingPlaying) {
         startTypingTimer();
         // 只要开始输入字符，立刻记录已练过该卡片
